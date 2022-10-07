@@ -6,7 +6,7 @@ def move(troop: Troop, direction: str, amount: int):
     """
     Moves the troop in a given direction
     arguments
-        troop: the troop to move
+        troop: the troop that moves
         direction: one of 'up', 'down', 'left' or 'right'
         amount: how many cells to move
     """
@@ -15,27 +15,37 @@ def move(troop: Troop, direction: str, amount: int):
 
 def action(troop: Troop, direction: str):
     """
-    UNDOCUMENTED
+    Makes the troop attack a resource or an enemy in a given direction
+    arguments
+        troop: the troop that executes the action
+        direction: one of 'up', 'down', 'left' or 'right'
     """
     _internal.action(troop=troop, direction=direction)
 
 
 def powerup(troop: Troop, stat: str):
     """
-    UNDOCUMENTED
+    Powerup a single troop statistic
+    arguments
+        troop: the troop that gets the powerup
+        stat: one of 'health', 'speed' or 'damage'
     """
     _internal.powerup(troop=troop, stat=stat)
 
 
 def create_troop(bot: Bot):
     """
-    UNDOCUMENTED
+    Creates a new troop
+    arguments:
+        bot: the bot that get the new troop
     """
     _internal.create(bot=bot)
 
 
-def get_info(pos: Vec) -> Troop | Resource | None:
+def get_info(pos: Vec) -> None | Troop | Resource:
     """
-    UNDOCUMENTED
+    Analyzes the given cell
+    arguments:
+        pos: The position of the cell. (0, 0) is bottom left
     """
     return _internal.get_info(pos)

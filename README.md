@@ -11,12 +11,12 @@ made in [Dear PyGui](https://github.com/hoffstadt/DearPyGui) and Python
 ![](images/main_game.png)
 
 
-### Objective
+## Objective
 
 The objective of this game is to code your bot and fight against another bot.
 
 
-### Game Rules
+## Game Rules
 
 To win the game, you have to do one of this:
 - Have more resource than the enemy after 1000 turns;
@@ -32,7 +32,7 @@ On your troop, you can power-up health, movement speed or damage (+1).
 A single troop, can move, attack or power-up, you can attack enemies or resources.
 
 
-### Syntax Rule
+## Syntax Rule
 
 - If you want to play the game, you have to put your code in the same folder as the `main.py` file (outside of `src/`).
 
@@ -40,11 +40,11 @@ A single troop, can move, attack or power-up, you can attack enemies or resource
 
 - Use the snake case convention to name your file.
 
-### Installing
+## Installing
 
 To install and play the game, simply execute the command `pip install -r requirements.txt`
 
-### TODO
+## TODO
 
 - At the end of the game, show bots' statistics like:
   - Trend of resources (graph)
