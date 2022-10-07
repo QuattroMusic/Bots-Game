@@ -119,6 +119,7 @@ def gui():
                     dpg.add_spacer(height=15)
                     dpg.add_text("Game Speed")
                     dpg.add_slider_float(width=400, min_value=0, default_value=0.207253, max_value=1, callback=format_slider_time, format=f"Speed: x{round(200 ** 0.207253, 2)}")
+                    dpg.add_spacer(height=10)
                     dpg.add_text("Turn: 0", tag="turn_text")
                 with dpg.group(horizontal=True):
                     # bots info

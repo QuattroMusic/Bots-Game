@@ -28,7 +28,7 @@ def move_troop_animation(troop: Troop, direction: Vec, amount: int):
         pos = Vec((troop.position.x * 64 + 8, (10 - troop.position.y) * 64 + 8))
         while pos.pos != dpg.get_item_pos(troop_id):
             dpg.set_item_pos(troop_id, pos.pos)
-    except SystemError:
+    except:
         pass
 
 
@@ -65,7 +65,7 @@ def action_troop_animation(troop: Troop, direction: Vec):
         pos = Vec((troop.position.x * 64 + 8, (10 - troop.position.y) * 64 + 8))
         while pos.pos != dpg.get_item_pos(troop_id):
             dpg.set_item_pos(troop_id, pos.pos)
-    except SystemError:
+    except:
         pass
 
 
@@ -74,7 +74,7 @@ def win_popup(winner: str | None):
     if winner is None:
         winner = "Draw!"
     else:
-        winner = f"{winner} Win!"
+        winner = f"{winner} Won!"
     length = len(str(winner)) * 7 + 25
 
     # show popup window and make a fancy animation

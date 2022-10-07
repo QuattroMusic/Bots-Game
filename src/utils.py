@@ -25,7 +25,8 @@ def gen_resource_id() -> str:
 
 
 def get_troop_id(troop: Troop) -> str:
-    return gv.map_troop_to_id[troop]
+    if troop in gv.map_troop_to_id:
+        return gv.map_troop_to_id[troop]
 
 
 def get_resource_id(resource: Resource) -> str:

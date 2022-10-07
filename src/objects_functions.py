@@ -40,4 +40,6 @@ def create(bot: Bot):
 
 
 def get_info(pos: Vec):
+    if is_outside(gv.world_map, pos):
+        return None
     return get_cell(gv.world_map, pos)

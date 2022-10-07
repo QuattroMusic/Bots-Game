@@ -43,3 +43,12 @@ A single troop, can move, attack or power-up, you can attack enemies or resource
 ### Installing
 
 To install and play the game, simply execute the command `pip install -r requirements.txt`
+
+### TODO
+
+- At the end of the game, show bots' statistics like:
+  - Trend of resources (graph)
+  - Eliminated troops and resources
+  - Top troops (kills, resources obtained, etc.)
+- Tooltip of the troops and resources, showing its stats
+- General graphic improvement

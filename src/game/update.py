@@ -67,17 +67,21 @@ def compute_actions(next_frame: Map):
         target_pos = troop.position + movement
         target_cell = get_cell(next_frame, target_pos)
 
-        if not troop_has_hit[troop]:
+        if target_cell is None:
+            troop_has_hit[troop] = True
+            continue
+
+        if troop_has_hit[troop] is False:
             troop_has_hit[troop] = True
 
             if isinstance(target_cell, Troop):
                 target_cell.health -= troop.damage
 
                 if target_cell.health <= 0:
-                    if dpg.does_item_exist(get_troop_id(troop)):
-                        dpg.delete_item(get_troop_id(target_cell))
+                    dpg.delete_item(get_troop_id(target_cell))
                     set_cell(next_frame, target_pos, None)
                     target_cell.owner.troops.remove(target_cell)
+                    del gv.map_troop_to_id[target_cell]
 
             elif isinstance(target_cell, Resource):
                 target_cell.health -= troop.damage

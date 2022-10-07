@@ -10,6 +10,9 @@ from src.DPG.animations import win_popup
 
 
 def next_step(is_single_step=False):
+    if gv.waiting_to_stop_game:
+        return
+
     if is_single_step and gv.is_game_running or gv.turn >= 1000:
         # don't do a single step if the game is already running
         return
@@ -30,8 +33,23 @@ def next_step(is_single_step=False):
         enemies = [i for i in gv.bots[1 - idx][2].troops]
         bot[2].enemies = enemies
 
+        # anti-cheating system
+        old_troops = [i[2].troops.copy() for i in gv.bots]
+        old_enemies = [i[2].enemies.copy() for i in gv.bots]
+        old_resources_pos = [i[2].resources_pos.copy() for i in gv.bots]
+        old_resources = [i[2].resources for i in gv.bots]
+        old_spawn_pos = [i[2].spawn_pos for i in gv.bots]
+
         # execute next turn
         bot[1](bot[2])
+
+        # anti-cheating system
+        for i in range(2):
+            gv.bots[i][2].troops = old_troops[i].copy()
+            gv.bots[i][2].enemies = old_enemies[i].copy()
+            gv.bots[i][2].resources_pos = old_resources_pos[i].copy()
+            gv.bots[i][2].resources = old_resources[i]
+            gv.bots[i][2].spawn_pos = old_spawn_pos[i]
 
     # calculate commands
     next_frame: Map = obj_func.copy(gv.world_map)
