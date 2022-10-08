@@ -1,2 +1,2 @@
-dearpygui==1.7.1
+dearpygui==1.6.2
 screeninfo

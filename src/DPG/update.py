@@ -66,14 +66,20 @@ def next_step(is_single_step=False):
     gv.commands_powerup.clear()
     gv.commands_create.clear()
 
-    game_update.update_info_panel()
+    update_info_panel()
 
     if any([len(gv.bots[i][2].troops) == 0 for i in range(2)]):
         win_conditions()
         return
 
+    # update statistics
+    for i in range(2):
+        gv.stat_bots_resources_trend[gv.bots[i][2]].append(gv.bots[i][2].resources)
+
+    # delay time from slider
     if not is_single_step:
         if gv.sleep_time != 0.005:
+            # max speed
             sleep(gv.sleep_time)
 
 
@@ -101,13 +107,41 @@ def play_continuous(sender):
 
 
 def win_conditions():
-    if gv.bots[0][2].resources == gv.bots[1][2].resources or all([len(gv.bots[i][2].troops) == 0 for i in range(2)]):
+    # troops checking
+    if all([len(gv.bots[i][2].troops) == 0 for i in range(2)]):
         Thread(target=win_popup, args=(None,), daemon=True, name="Popup").start()
-    elif (gv.bots[0][2].resources > gv.bots[1][2].resources) or (len(gv.bots[1][2].troops) == 0):
+    elif len(gv.bots[1][2].troops) == 0:
         Thread(target=win_popup, args=(gv.bots[0][0],), daemon=True, name="Popup").start()
-    elif (gv.bots[0][2].resources < gv.bots[1][2].resources) or (len(gv.bots[0][2].troops) == 0):
+    elif len(gv.bots[0][2].troops) == 0:
         Thread(target=win_popup, args=(gv.bots[1][0],), daemon=True, name="Popup").start()
+    # resource checking
+    elif gv.bots[0][2].resources > gv.bots[1][2].resources:
+        Thread(target=win_popup, args=(gv.bots[0][0],), daemon=True, name="Popup").start()
+    elif gv.bots[0][2].resources < gv.bots[1][2].resources:
+        Thread(target=win_popup, args=(gv.bots[1][0],), daemon=True, name="Popup").start()
+    elif gv.bots[0][2].resources == gv.bots[1][2].resources:
+        Thread(target=win_popup, args=(None,), daemon=True, name="Popup").start()
 
     gv.is_game_running = False
     gv.waiting_to_stop_game = True
     dpg.set_item_label("play_button", "Play")
+
+
+def update_info_panel():
+    for n, bot in enumerate((gv.bots[0][2], gv.bots[1][2])):
+        # updates resources text
+        dpg.set_value(f"resources_bot{n}", f"Resources: {int(bot.resources)}")
+
+        # clear the table ignoring existent troops
+        for i in dpg.get_item_children(f"table_bot{n}", 1):
+            if dpg.get_item_children(f"table_bot{n}", 1).index(i) < len(bot.troops):
+                continue
+
+            for k in dpg.get_item_children(i, 1):
+                dpg.set_value(k, "")
+
+        for i in zip(dpg.get_item_children(f"table_bot{n}", 1), bot.troops):
+            for k in zip(dpg.get_item_children(i[0], 1), [gv.map_troop_to_id[i[1]][6::], str(i[1].position.pos).replace(" ",""), i[1].health, i[1].move_speed, i[1].damage]):
+                dpg.set_value(k[0], str(k[1]))
+
+        dpg.set_value("turn_text", f"Turn: {gv.turn}")

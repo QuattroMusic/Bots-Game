@@ -8,7 +8,7 @@ This repository is an improved version of the original project
 Instead of playing using CMD and `.txt` files, you are going to play using a GUI
 made in [Dear PyGui](https://github.com/hoffstadt/DearPyGui) and Python
 
-![](images/main_game.png)
+![](images/game.png)
 
 
 ## Objective
@@ -31,6 +31,12 @@ On your troop, you can power-up health, movement speed or damage (+1).
 
 A single troop, can move, attack or power-up, you can attack enemies or resources.
 
+Each bot can, in the following order:
+1. Move each troop once per turn
+2. Use each troop to attack enemy troops or resources
+3. Improve as many troop statistics as you want, consuming resources in the process. Each troop can be upgraded multiple times, even the same statistic.
+4. Spawn 1 new troop per turn, consuming resources in the process. You can control a maximum of 10 troops at the same time.
+
 
 ## Syntax Rule
 
@@ -43,12 +49,3 @@ A single troop, can move, attack or power-up, you can attack enemies or resource
 ## Installing
 
 To install and play the game, simply execute the command `pip install -r requirements.txt`
-
-## TODO
-
-- At the end of the game, show bots' statistics like:
-  - Trend of resources (graph)
-  - Eliminated troops and resources
-  - Top troops (kills, resources obtained, etc.)
-- Tooltip of the troops and resources, showing its stats
-- General graphic improvement

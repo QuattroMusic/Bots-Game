@@ -1,16 +1,17 @@
 from src.battle.objects import Troop, Resource, Vec
 import src.game.variables as gv
+from src.battle.constants import Direction
 
 
 def eval_direction(direction: str) -> Vec:
     match direction:
-        case "up":
+        case "up" | Direction.UP:
             return Vec((0, 1))
-        case "right":
+        case "right" | Direction.RIGHT:
             return Vec((1, 0))
-        case "down":
+        case "down" | Direction.DOWN:
             return Vec((0, -1))
-        case "left":
+        case "left" | Direction.LEFT:
             return Vec((-1, 0))
 
 

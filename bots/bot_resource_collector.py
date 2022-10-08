@@ -1,13 +1,15 @@
-from src.battle.functions import *
-from src.battle.objects import *
+from src.battle.functions import move, action, powerup, create_troop, get_info
+from src.battle.objects import Vec, Bot, Troop, Resource
+from src.battle.constants import Stat, Direction
 
 
 def on_start_turn(self: Bot):
     create_troop(self)
+
     for troop in self.troops:
         # find closest resource
-        closest_res = None
-        closest_dist = None
+        closest_res: Vec | None = None
+        closest_dist: float | None = None
 
         for res in self.resources_pos:
             if closest_res is None:

@@ -1,12 +1,14 @@
 import dearpygui.dearpygui as dpg
-from src.battle.objects import Map, Troop, Vec, Resource, Bot
+from src.battle.objects import Map, Troop, Vec, Resource
 from src.objects_functions import is_outside, get_cell, set_cell
 import src.game.variables as gv
 from threading import Thread
 from src.DPG.animations import move_troop_animation, action_troop_animation
 from src.configs import GAIN_PER_RESOURCE, TROOP_POWERUP_COST, TROOP_CREATION_COST, MAX_TROOPS, MAX_RESOURCES, MAP_HEIGHT, MAP_WIDTH
 from src.utils import gen_troop_id, gen_resource_id, get_troop_id, get_resource_id
-from random import sample
+from random import sample, seed
+from time import time
+from src.battle.constants import Stat
 
 
 def compute_movements(next_frame: Map):
@@ -57,9 +59,11 @@ def compute_movements(next_frame: Map):
 
 
 def compute_actions(next_frame: Map):
-    resources_hit: list[Resource] = []
-    resources_hit_by: dict[Resource, list[Bot] | None] = {}
+    resources_hit_by: dict[Resource, list[Troop] | None] = {}
+    troops_hit_by: dict[Troop, list[Troop] | None] = {}
+
     troop_has_hit: dict[Troop, bool] = {}
+
     for troop, _ in gv.commands_action:
         troop_has_hit.update({troop: False})
 
@@ -67,63 +71,69 @@ def compute_actions(next_frame: Map):
         target_pos = troop.position + movement
         target_cell = get_cell(next_frame, target_pos)
 
-        if target_cell is None:
-            troop_has_hit[troop] = True
-            continue
-
         if troop_has_hit[troop] is False:
             troop_has_hit[troop] = True
 
             if isinstance(target_cell, Troop):
                 target_cell.health -= troop.damage
-
-                if target_cell.health <= 0:
-                    dpg.delete_item(get_troop_id(target_cell))
-                    set_cell(next_frame, target_pos, None)
-                    target_cell.owner.troops.remove(target_cell)
-                    del gv.map_troop_to_id[target_cell]
+                if target_cell in troops_hit_by:
+                    troops_hit_by[target_cell].append(troop)
+                else:
+                    troops_hit_by[target_cell] = [troop]
 
             elif isinstance(target_cell, Resource):
                 target_cell.health -= troop.damage
-                resources_hit.append(target_cell)
-                if target_cell not in list(resources_hit_by.keys()):
-                    resources_hit_by.update({target_cell: [troop.owner]})
+                if target_cell in resources_hit_by:
+                    resources_hit_by[target_cell].append(troop)
                 else:
-                    resources_hit_by[target_cell].append(troop.owner)
+                    resources_hit_by[target_cell] = [troop]
 
             Thread(target=action_troop_animation, args=(troop, movement), daemon=True).start()
 
-    for troop, movement in gv.commands_action:
-        troop_has_hit[troop] = False
+    # remove troops
+    for troop, attackers in troops_hit_by.items():
+        if troop.health <= 0:
+            # delete troop
+            dpg.delete_item(get_troop_id(troop))
+            set_cell(next_frame, troop.position, None)
+            troop.owner.troops.remove(troop)
 
-    for resource in set(resources_hit):
+            # update statistics
+            gv.stat_bots_eliminated_troops[attackers[0].owner] += 1
+            for attacker in attackers:
+                gv.stat_bots_troops_kills[attacker.owner][attacker] += 1
+
+    # remove resources
+    for resource, attackers in resources_hit_by.items():
         if resource.health <= 0:
-            destroyed_by = list(set([item for sublist in list(resources_hit_by.values()) for item in sublist]))
-
-            if dpg.does_item_exist(get_resource_id(resource)):
-                dpg.delete_item(get_resource_id(resource))
+            # destroy resource object and set resources to the bot
+            dpg.delete_item(get_resource_id(resource))
             set_cell(next_frame, resource.position, None)
-            for owner in destroyed_by:
-                owner.resources += round(GAIN_PER_RESOURCE / len(destroyed_by), 2)
-        else:
-            if resource in resources_hit_by:
-                del resources_hit_by[resource]
+
+            for attacker in attackers:
+                attacker.owner.resources += round(GAIN_PER_RESOURCE / len(attackers), 2)
+                # statistics
+                gv.stat_bots_eliminated_resources[attacker.owner] += 1
+                gv.stat_bots_troops_resources[attacker.owner][attacker] += 1
 
 
 def compute_powerup():
-    for troop, powerId in gv.commands_powerup:
+    for troop, power_id in gv.commands_powerup:
         if troop.owner.resources < TROOP_POWERUP_COST:
             continue
 
-        match powerId:
-            case "health":
+        match power_id:
+            case "health" | Stat.HEALTH:
                 troop.health += 1
-            case "speed":
+            case "speed" | Stat.SPEED:
                 troop.move_speed += 1
-            case "damage":
+            case "damage" | Stat.DAMAGE:
                 troop.damage += 1
 
         troop.owner.resources -= TROOP_POWERUP_COST
+
+        # statistics
+        gv.stat_bots_used_resources[troop.owner]['powerup'] += TROOP_POWERUP_COST
 
 
 def compute_create(next_frame):
@@ -142,28 +152,15 @@ def compute_create(next_frame):
             tex = gv.tex_troop_blue if bot == gv.bots[0][2] else gv.tex_troop_red
             dpg.add_image(tex, pos=(truePos * 64 + Vec((8, 8))).pos, parent="child_window_main_game", tag=troop_id)
 
-
-def update_info_panel():
-    for n, bot in enumerate((gv.bots[0][2], gv.bots[1][2])):
-        # updates resources text
-        dpg.set_value(f"resources_bot{n}", f"Resources: {int(bot.resources)}")
-
-        # clear the table ignoring existent troops
-        for i in dpg.get_item_children(f"table_bot{n}", 1):
-            if dpg.get_item_children(f"table_bot{n}", 1).index(i) < len(bot.troops):
-                continue
-
-            for k in dpg.get_item_children(i, 1):
-                dpg.set_value(k, "")
-
-        for i in zip(dpg.get_item_children(f"table_bot{n}", 1), bot.troops):
-            for k in zip(dpg.get_item_children(i[0], 1), [i[1].position, i[1].health, i[1].damage, i[1].move_speed]):
-                dpg.set_value(k[0], str(k[1]))
-
-        dpg.set_value("turn_text", f"Turn: {gv.turn}")
+            # statistics
+            gv.stat_bots_troops_kills[bot][troop] = 0
+            gv.stat_bots_troops_resources[bot][troop] = 0
+            gv.stat_bots_created_troops[bot] += 1
+            gv.stat_bots_used_resources[bot]['troops'] += TROOP_CREATION_COST
 
 
 def update_map_resources(next_frame: Map = gv.world_map):
+    seed(time())
     resources_count = 0
     for row in next_frame.map:
         for cell in row:
@@ -178,7 +175,6 @@ def update_map_resources(next_frame: Map = gv.world_map):
                 if get_cell(next_frame, pos) is None:
                     empty_spots.append(pos)
         chosen_spots: list[Vec] = sample(empty_spots, MAX_RESOURCES - resources_count)
-
         for pos in chosen_spots:
             resource = Resource()
             gv.map_resource_to_id.update({resource: gen_resource_id()})

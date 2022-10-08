@@ -25,7 +25,7 @@ def start():
             y_pos = (m.height - viewport_height) // 2
 
     dpg.create_context()
-    dpg.create_viewport(min_width=viewport_width, min_height=viewport_height, max_width=viewport_width, max_height=viewport_height, resizable=False, x_pos=x_pos, y_pos=y_pos)
+    dpg.create_viewport(min_width=viewport_width, min_height=viewport_height, max_width=viewport_width, max_height=viewport_height, resizable=False, x_pos=x_pos, y_pos=y_pos, title="Bots Game")
     dpg.setup_dearpygui()
 
     game_setup.setup_bots()
@@ -34,7 +34,9 @@ def start():
     DPG_textures.gen_terrain()
     game_setup.add_starting_troops()
     game_update.update_map_resources(gv.world_map)
-    game_update.update_info_panel()
+
+    DPG_update.update_info_panel()
+
     DPG_theming.load_global_theme()
 
     dpg.show_viewport()
@@ -75,14 +77,17 @@ def stop_game():
     gv.map_troop_to_id.clear()
     gv.map_resource_to_id.clear()
 
-    game_setup.add_starting_troops()
-    game_update.update_map_resources(gv.world_map)
-    game_update.update_info_panel()
+    game_setup.reset_statistics()
 
     gv.commands_create.clear()
     gv.commands_action.clear()
     gv.commands_powerup.clear()
     gv.commands_move.clear()
+
+    # start new game
+    game_setup.add_starting_troops()
+    game_update.update_map_resources(gv.world_map)
+    DPG_update.update_info_panel()
 
     for i, bot in enumerate(gv.bots):
         dpg.set_value(f"bot {i} text", gv.bots[i][0])
@@ -97,11 +102,11 @@ def format_slider_time(sender, data):
 def gen_empty_table(tag):
     with dpg.table(borders_innerH=True, borders_outerH=True, borders_innerV=True, borders_outerV=True,
                    row_background=True, tag=tag):
-        for text in ["Pos", "HP", "DMG", "Speed"]:
+        for text in ["ID", "Pos", "HP", "Speed", "DMG"]:
             dpg.add_table_column(label=text)
         for _ in range(MAX_TROOPS):
             with dpg.table_row():
-                for i in range(4):
+                for i in range(5):
                     dpg.add_text()
 
 
@@ -136,5 +141,4 @@ def gui():
                         dpg.add_spacer(height=15)
                         gen_empty_table("table_bot1")
             # main game, right panel
-            with dpg.child_window(tag="child_window_main_game"):
-                dpg.add_drawlist(height=600, width=600, tag="drawlist")
+            dpg.add_child_window(tag="child_window_main_game")

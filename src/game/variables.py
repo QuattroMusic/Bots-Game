@@ -23,3 +23,12 @@ commands_create: list[Bot] = []
 # mappers
 map_troop_to_id: dict[Troop, str] = {}
 map_resource_to_id: dict[Resource, str] = {}
+
+# final statistics
+stat_bots_resources_trend: dict[Bot, list[int]] = {}
+stat_bots_eliminated_troops: dict[Bot, int] = {}
+stat_bots_eliminated_resources: dict[Bot, int] = {}
+stat_bots_created_troops: dict[Bot, int] = {}
+stat_bots_used_resources: dict[Bot, dict[str, int]] = {}
+stat_bots_troops_kills: dict[Bot, dict[Troop, int]] = {}
+stat_bots_troops_resources: dict[Bot, dict[Troop, int]] = {}

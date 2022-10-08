@@ -5,7 +5,7 @@ class Vec:
     def __init__(self, pos: list[int, int] | tuple[int, int]):
         self.x: int = pos[0]
         self.y: int = pos[1]
-        self.pos: list[int, int] = [self.x, self.y]
+        self.pos = (self.x, self.y)
 
     def __add__(self, cell2: 'Vec') -> 'Vec':
         """
@@ -24,21 +24,26 @@ class Vec:
     def __mul__(self, other: int) -> 'Vec':
         """
         Multiplication with a number or a list
-        Vec((2, 2)) * 5        ->  Vec((10, 10))
+        Vec((2, 2)) * 5  ->  Vec((10, 10))
         """
         return Vec((self.x * other, self.y * other))
 
-    def __rmul__(self, other):
+    def __truediv__(self, other: int):
         """
-        Same as __mul__
+        Division with an integer
+        Output is an integer
+        Vec((10, 5)) / 5  -> Vec((2, 1))
+        Vec((8, 5)) / 4   -> Vec((2, 1))
         """
-        return self.__mul__(other)
+        return Vec((self.x // other, self.y // other))
 
-    def __truediv__(self, other):
-        return Vec((self.x / other, self.y / other))
-
-    def __rtruediv__(self, other):
-        return self.__truediv__(other)
+    def __eq__(self, other: 'Vec'):
+        """
+        Check if a vector is equal to another
+        Vec((3, 5)) == Vec((3, 5))  -> True
+        Vec((1, 6)) == Vec((4, 2))  -> False
+        """
+        return self.x == other.x and self.y == self.y
 
     def length(self) -> float:
         """
@@ -49,8 +54,15 @@ class Vec:
         """
         return pow(pow(self.x, 2) + pow(self.y, 2), 1 / 2)
 
+    def __repr__(self):
+        return self.__str__()
+
     def __str__(self):
-        return f"({self.x}, {self.y})"
+        """
+        When printing a Vec
+        print(Vec((2, 3)))  -> Vec((2, 3))
+        """
+        return f"Vec(({self.x}, {self.y}))"
 
 
 class Resource:
