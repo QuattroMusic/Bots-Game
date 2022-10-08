@@ -8,7 +8,7 @@ This repository is an improved version of the original project
 Instead of playing using CMD and `.txt` files, you are going to play using a GUI
 made in [Dear PyGui](https://github.com/hoffstadt/DearPyGui) and Python
 
-![](images/game.png)
+![](data/game.png)
 
 
 ## Objective
